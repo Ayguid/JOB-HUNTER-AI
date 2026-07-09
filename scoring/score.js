@@ -1,50 +1,48 @@
+import RULES from "../config/rules.js";
+
+// Matchea la keyword como palabra/frase completa, no como substring de otra
+// palabra (ej: "qa" no matchea dentro de "square"). El "." en variantes tipo
+// "vue.js" o "node.js" se escapa para que sea literal.
+function buildMatcher(keyword) {
+    const escaped = keyword.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    return new RegExp(`\\b${escaped}\\b`, "i");
+}
+
+const COMPILED_RULES = RULES.map(rule => ({
+    ...rule,
+    patterns: rule.keywords.map(buildMatcher),
+}));
+
 export default function score(job) {
+    const text = [
+        job.title,
+        job.company,
+        job.location,
+        job.description
+    ]
+        .filter(Boolean)
+        .join(" ");
 
-    let score = 0;
     const reasons = [];
+    let total = 0;
 
-    const text = `
-        ${job.title}
-        ${job.company}
-        ${job.location}
-    `.toLowerCase();
+    for (const rule of COMPILED_RULES) {
+        const matchedKeyword = rule.keywords.find((keyword, index) =>
+            rule.patterns[index].test(text)
+        );
 
-    function add(points, reason) {
-        score += points;
-        reasons.push({
-            points,
-            reason
-        });
+        if (matchedKeyword) {
+
+            total += rule.points;
+
+            reasons.push({
+                keyword: matchedKeyword,
+                points: rule.points,
+                reason: rule.reason
+            });
+
+        }
     }
 
-    if (text.includes("vue")) add(20, "Vue");
-    if (text.includes("laravel")) add(20, "Laravel");
-    if (text.includes("php")) add(15, "PHP");
-    if (text.includes("node")) add(10, "Node");
-    if (text.includes("typescript")) add(8, "TypeScript");
-    if (text.includes("javascript")) add(8, "JavaScript");
-
-    if (text.includes("remote")) add(20, "Remote");
-
-    if (text.includes("qa")) add(15, "QA");
-
-    if (text.includes("selenium")) add(15, "Selenium");
-
-    if (text.includes("cypress")) add(10, "Cypress");
-
-    if (text.includes("solution")) add(15, "Solutions Engineer");
-
-    if (text.includes("consult")) add(10, "Consulting");
-
-    if (text.includes("documentation")) add(15, "Documentation");
-
-    if (text.includes("technical writer")) add(20, "Technical Writer");
-
-    if (text.includes("senior")) add(5, "Senior");
-
-    return {
-        score,
-        reasons
-    };
-
+    return { score: total, reasons, text};
 }

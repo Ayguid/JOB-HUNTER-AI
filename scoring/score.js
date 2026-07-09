@@ -1,33 +1,50 @@
 export default function score(job) {
 
     let score = 0;
+    const reasons = [];
 
-    const text = (
-        job.title + " " +
-        job.company + " " +
-        job.location
-    ).toLowerCase();
+    const text = `
+        ${job.title}
+        ${job.company}
+        ${job.location}
+    `.toLowerCase();
 
-    if (text.includes("vue")) score += 20;
-    if (text.includes("laravel")) score += 20;
-    if (text.includes("php")) score += 15;
-    if (text.includes("node")) score += 10;
-    if (text.includes("javascript")) score += 8;
-    if (text.includes("typescript")) score += 8;
+    function add(points, reason) {
+        score += points;
+        reasons.push({
+            points,
+            reason
+        });
+    }
 
-    if (text.includes("qa")) score += 12;
-    if (text.includes("selenium")) score += 12;
-    if (text.includes("cypress")) score += 10;
+    if (text.includes("vue")) add(20, "Vue");
+    if (text.includes("laravel")) add(20, "Laravel");
+    if (text.includes("php")) add(15, "PHP");
+    if (text.includes("node")) add(10, "Node");
+    if (text.includes("typescript")) add(8, "TypeScript");
+    if (text.includes("javascript")) add(8, "JavaScript");
 
-    if (text.includes("solutions engineer")) score += 18;
-    if (text.includes("implementation")) score += 15;
-    if (text.includes("consultant")) score += 12;
+    if (text.includes("remote")) add(20, "Remote");
 
-    if (text.includes("documentation")) score += 15;
-    if (text.includes("technical writer")) score += 20;
+    if (text.includes("qa")) add(15, "QA");
 
-    if (text.includes("remote")) score += 20;
+    if (text.includes("selenium")) add(15, "Selenium");
 
-    return score;
+    if (text.includes("cypress")) add(10, "Cypress");
+
+    if (text.includes("solution")) add(15, "Solutions Engineer");
+
+    if (text.includes("consult")) add(10, "Consulting");
+
+    if (text.includes("documentation")) add(15, "Documentation");
+
+    if (text.includes("technical writer")) add(20, "Technical Writer");
+
+    if (text.includes("senior")) add(5, "Senior");
+
+    return {
+        score,
+        reasons
+    };
 
 }

@@ -62,12 +62,8 @@ for (const crawler of crawlers) {
     totalFound += jobs.length;
 
     for (const job of jobs) {
-
         const result = stmt.run(job);
-
-        if (result.changes)
-            inserted++;
-
+        if (result.changes) inserted++;
     }
 
     console.log(`${crawler.name}: ${jobs.length}`);

@@ -15,7 +15,8 @@ INSERT OR IGNORE INTO jobs
     location,
     remote,
     url,
-    salary
+    salary,
+    description
 )
 VALUES
 (
@@ -26,7 +27,8 @@ VALUES
     @location,
     @remote,
     @url,
-    @salary
+    @salary,
+    @description
 )
 `);
 

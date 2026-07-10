@@ -1,48 +1,38 @@
-import RULES from "../config/rules.js";
+import TAXONOMY from "../config/taxonomy.js";
 
-// Matchea la keyword como palabra/frase completa, no como substring de otra
-// palabra (ej: "qa" no matchea dentro de "square"). El "." en variantes tipo
-// "vue.js" o "node.js" se escapa para que sea literal.
 function buildMatcher(keyword) {
     const escaped = keyword.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     return new RegExp(`\\b${escaped}\\b`, "i");
 }
 
-const COMPILED_RULES = RULES.map(rule => ({
-    ...rule,
-    patterns: rule.keywords.map(buildMatcher),
+const COMPILED = TAXONOMY.map(entry => ({
+    ...entry,
+    patterns: entry.keywords.map(buildMatcher),
 }));
 
 export default function score(job) {
-    const text = [
-        job.title,
-        job.company,
-        job.location,
-        job.description
-    ]
+    const text = [job.title, job.company, job.location, job.description]
         .filter(Boolean)
         .join(" ");
 
     const reasons = [];
     let total = 0;
 
-    for (const rule of COMPILED_RULES) {
-        const matchedKeyword = rule.keywords.find((keyword, index) =>
-            rule.patterns[index].test(text)
+    for (const entry of COMPILED) {
+        const matchedKeyword = entry.keywords.find((keyword, index) =>
+            entry.patterns[index].test(text)
         );
 
         if (matchedKeyword) {
-
-            total += rule.points;
-
+            total += entry.points;
             reasons.push({
+                tag: entry.tag,
                 keyword: matchedKeyword,
-                points: rule.points,
-                reason: rule.reason
+                points: entry.points,
+                label: entry.label
             });
-
         }
     }
 
-    return { score: total, reasons, text};
+    return { score: total, reasons, text };
 }

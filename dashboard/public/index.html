@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Job Hunter Dashboard</title>
+<style>
+    body { font-family: system-ui, sans-serif; background: #111; color: #eee; margin: 0; padding: 20px; }
+    h1 { font-size: 20px; margin-bottom: 16px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #333; font-size: 14px; }
+    th { color: #888; font-weight: 600; position: sticky; top: 0; background: #111; }
+    tr:hover { background: #1a1a1a; }
+    .score { font-weight: bold; color: #4ade80; }
+    .tags { color: #888; font-size: 12px; }
+    .tag { display: inline-block; background: #222; border-radius: 4px; padding: 2px 6px; margin: 2px 2px 0 0; }
+    a { color: #60a5fa; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    #loading { color: #888; }
+</style>
+</head>
+<body>
+
+<h1>Job Hunter — Resultados</h1>
+<div id="loading">Cargando...</div>
+<table id="jobs-table" style="display:none">
+    <thead>
+        <tr>
+            <th>Score</th>
+            <th>Título</th>
+            <th>Empresa</th>
+            <th>Ubicación</th>
+            <th>Tags</th>
+        </tr>
+    </thead>
+    <tbody id="jobs-body"></tbody>
+</table>
+
+<script>
+fetch("/api/jobs")
+    .then(res => res.json())
+    .then(jobs => {
+
+        const body = document.getElementById("jobs-body");
+
+        for (const job of jobs) {
+
+            const tags = job.reasons
+                .sort((a, b) => b.points - a.points)
+                .map(r => `<span class="tag">${r.tag} +${r.points}</span>`)
+                .join(" ");
+
+            const row = document.createElement("tr");
+
+            row.innerHTML = `
+                <td class="score">${job.score}</td>
+                <td><a href="${job.url}" target="_blank">${job.title}</a></td>
+                <td>${job.company}</td>
+                <td>${job.location}</td>
+                <td class="tags">${tags}</td>
+            `;
+
+            body.appendChild(row);
+
+        }
+
+        document.getElementById("loading").style.display = "none";
+        document.getElementById("jobs-table").style.display = "table";
+
+    })
+    .catch(err => {
+        document.getElementById("loading").textContent = "Error cargando jobs: " + err.message;
+    });
+</script>
+
+</body>
+</html>

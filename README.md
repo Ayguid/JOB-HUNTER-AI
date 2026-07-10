@@ -9,6 +9,7 @@ Job Hunter AI is a small Node.js automation tool for discovering and prioritizin
 - Filters out clearly irrelevant titles with a configurable exclusion list
 - Scores opportunities using a custom taxonomy of technologies, practices, and soft skills
 - Displays the highest-ranked matches with the reasons behind each score
+- Serves the ranked jobs through a local web dashboard
 - Generates a Markdown CV draft in the output folder for a chosen job
 
 ## Tech stack
@@ -32,6 +33,8 @@ Job Hunter AI is a small Node.js automation tool for discovering and prioritizin
 - scoring/score.js — scoring logic for ranking opportunities
 - generator/generateCV.js — builds a CV summary and experience selection from job matches
 - generator/index.js — generates a Markdown CV file for a specific job
+- dashboard/server.js — starts a local Express dashboard that serves ranked jobs
+- dashboard/public/index.html — simple frontend for browsing results
 - data/experience.js and data/summary.js — content used to generate the CV draft
 - output/ — generated files such as cv.md
 
@@ -55,7 +58,15 @@ Job Hunter AI is a small Node.js automation tool for discovering and prioritizin
    npm run list
    ```
 
-4. Generate a CV draft for a specific job ID from the list output:
+4. Start the web dashboard:
+
+   ```bash
+   npm run dashboard
+   ```
+
+   Then open http://localhost:3000 to browse the ranked jobs.
+
+5. Generate a CV draft for a specific job ID from the list output:
 
    ```bash
    npm run generate -- 1
@@ -63,7 +74,7 @@ Job Hunter AI is a small Node.js automation tool for discovering and prioritizin
 
    The generated Markdown file will be written to output/cv.md.
 
-5. Run the script in watch mode during development:
+6. Run the script in watch mode during development:
 
    ```bash
    npm run dev
@@ -75,7 +86,8 @@ Job Hunter AI is a small Node.js automation tool for discovering and prioritizin
 2. Each crawler fetches job listings from its source and normalizes them.
 3. Jobs are inserted into the jobs table in the SQLite database.
 4. The listing script reads those records, removes excluded titles, and applies the scoring logic from the taxonomy.
-5. The generator uses the matched tags to build a customized CV summary and experience section for a chosen job.
+5. The Express dashboard exposes the same ranked job data through a local API and a simple frontend.
+6. The generator uses the matched tags to build a customized CV summary and experience section for a chosen job.
 
 ## Scoring
 
@@ -101,7 +113,8 @@ You can also tune the behavior by editing:
 
 - config/taxonomy.js to adjust scoring rules and weights
 - config/exclude-titles.js to filter out unwanted roles
+- config/exclude-keywords.js to hide additional job titles or locations
 
 ## Notes
 
-This repository is currently a lightweight automation workflow rather than a full web app. The dashboard folder remains available for future expansion, while the generator pipeline is already producing Markdown CV drafts from the ranked jobs.
+This repository now includes a lightweight local dashboard for reviewing ranked jobs, while the generator pipeline continues to produce Markdown CV drafts from the same data.

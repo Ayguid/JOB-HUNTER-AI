@@ -1,33 +1,28 @@
 import express from "express";
 import config from "../config.js";
-import db from "../database/sqlite.js";
-import score from "../scoring/score.js";
-import EXCLUDE_KEYWORDS from "../config/exclude-keywords.js";
+import { getProcessedJobs } from "../shared/job-processor.js";
 
 const app = express();
-
-function isExcluded(job) {
-    const text = `${job.title ?? ""} ${job.location ?? ""}`.toLowerCase();
-    return EXCLUDE_KEYWORDS.some(keyword => text.includes(keyword));
-}
-
 app.use(express.static("dashboard/public"));
 
 app.get("/api/jobs", (req, res) => {
-
-    const jobs = db.prepare(`SELECT * FROM jobs`).all()
-        .filter(job => !isExcluded(job));
-
-    for (const job of jobs) {
-        const result = score(job);
-        job.score = result.score;
-        job.reasons = result.reasons;
-    }
-
-    jobs.sort((a, b) => b.score - a.score);
-
-    res.json(jobs);
-
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 50;
+    const offset = (page - 1) * limit;
+    
+    const allJobs = getProcessedJobs();
+    const total = allJobs.length;
+    const paginatedJobs = allJobs.slice(offset, offset + limit);
+    
+    res.json({
+        data: paginatedJobs,
+        pagination: {
+            page,
+            limit,
+            total,
+            totalPages: Math.ceil(total / limit)
+        }
+    });
 });
 
 app.listen(config.port, () => {

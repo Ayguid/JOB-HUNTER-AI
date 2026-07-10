@@ -1,6 +1,6 @@
 import fs from "fs";
 import db from "./database/sqlite.js";
-import { normalizeJob } from "./crawler/utils.js";
+import { normalizeJob } from "./crawlers/utils.js";
 
 console.clear();
 
@@ -35,14 +35,14 @@ VALUES
 
 const crawlers = [];
 
-const files = fs.readdirSync("./crawler");
+const files = fs.readdirSync("./crawlers");
 
 for (const file of files) {
 
     if (!file.endsWith(".js") || file === "utils.js")
         continue;
 
-    const module = await import(`./crawler/${file}`);
+    const module = await import(`./crawlers/${file}`);
 
     if (!module.default)
         continue;

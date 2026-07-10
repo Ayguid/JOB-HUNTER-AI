@@ -16,6 +16,12 @@
     a { color: #60a5fa; text-decoration: none; }
     a:hover { text-decoration: underline; }
     #loading { color: #888; }
+    .pagination { margin-top: 20px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .pagination button { background: #222; color: #eee; border: 1px solid #444; padding: 6px 12px; cursor: pointer; border-radius: 4px; }
+    .pagination button:hover:not(:disabled) { background: #333; }
+    .pagination button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .pagination .info { color: #888; font-size: 14px; }
+    .pagination select { background: #222; color: #eee; border: 1px solid #444; padding: 6px; border-radius: 4px; }
 </style>
 </head>
 <body>
@@ -35,41 +41,94 @@
     <tbody id="jobs-body"></tbody>
 </table>
 
+<div id="pagination-container" style="display:none" class="pagination">
+    <button id="prev-btn" disabled>Anterior</button>
+    <span class="info" id="page-info">Página 1 de 1</span>
+    <button id="next-btn" disabled>Siguiente</button>
+    <span class="info">Mostrar:</span>
+    <select id="limit-select">
+        <option value="20">20</option>
+        <option value="50" selected>50</option>
+        <option value="100">100</option>
+        <option value="200">200</option>
+    </select>
+</div>
+
 <script>
-fetch("/api/jobs")
-    .then(res => res.json())
-    .then(jobs => {
+let currentPage = 1;
+let currentLimit = 50;
+let totalPages = 1;
 
-        const body = document.getElementById("jobs-body");
+const loading = document.getElementById("loading");
+const table = document.getElementById("jobs-table");
+const body = document.getElementById("jobs-body");
+const paginationContainer = document.getElementById("pagination-container");
+const prevBtn = document.getElementById("prev-btn");
+const nextBtn = document.getElementById("next-btn");
+const pageInfo = document.getElementById("page-info");
+const limitSelect = document.getElementById("limit-select");
 
-        for (const job of jobs) {
+function loadJobs(page, limit) {
+    loading.style.display = "block";
+    table.style.display = "none";
+    paginationContainer.style.display = "none";
+    body.innerHTML = "";
 
-            const tags = job.reasons
-                .sort((a, b) => b.points - a.points)
-                .map(r => `<span class="tag">${r.tag} +${r.points}</span>`)
-                .join(" ");
+    fetch(`/api/jobs?page=${page}&limit=${limit}`)
+        .then(res => res.json())
+        .then(response => {
+            const { data, pagination } = response;
+            currentPage = pagination.page;
+            currentLimit = pagination.limit;
+            totalPages = pagination.totalPages;
 
-            const row = document.createElement("tr");
+            for (const job of data) {
+                const tags = job.reasons
+                    .sort((a, b) => b.points - a.points)
+                    .map(r => `<span class="tag">${r.tag} +${r.points}</span>`)
+                    .join(" ");
 
-            row.innerHTML = `
-                <td class="score">${job.score}</td>
-                <td><a href="${job.url}" target="_blank">${job.title}</a></td>
-                <td>${job.company}</td>
-                <td>${job.location}</td>
-                <td class="tags">${tags}</td>
-            `;
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td class="score">${job.score}</td>
+                    <td><a href="${job.url}" target="_blank">${job.title}</a></td>
+                    <td>${job.company}</td>
+                    <td>${job.location}</td>
+                    <td class="tags">${tags}</td>
+                `;
+                body.appendChild(row);
+            }
 
-            body.appendChild(row);
+            loading.style.display = "none";
+            table.style.display = "table";
+            paginationContainer.style.display = "flex";
+            updatePagination();
+        })
+        .catch(err => {
+            loading.textContent = "Error cargando jobs: " + err.message;
+        });
+}
 
-        }
+function updatePagination() {
+    pageInfo.textContent = `Página ${currentPage} de ${totalPages}`;
+    prevBtn.disabled = currentPage <= 1;
+    nextBtn.disabled = currentPage >= totalPages;
+}
 
-        document.getElementById("loading").style.display = "none";
-        document.getElementById("jobs-table").style.display = "table";
+prevBtn.addEventListener("click", () => {
+    if (currentPage > 1) loadJobs(currentPage - 1, currentLimit);
+});
 
-    })
-    .catch(err => {
-        document.getElementById("loading").textContent = "Error cargando jobs: " + err.message;
-    });
+nextBtn.addEventListener("click", () => {
+    if (currentPage < totalPages) loadJobs(currentPage + 1, currentLimit);
+});
+
+limitSelect.addEventListener("change", () => {
+    loadJobs(1, parseInt(limitSelect.value));
+});
+
+// Carga inicial
+loadJobs(1, 50);
 </script>
 
 </body>

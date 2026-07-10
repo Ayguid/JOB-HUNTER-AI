@@ -7,7 +7,6 @@
   "scripts": {
     "start": "node index.js",
     "dev": "node --watch index.js",
-    "reset": "node database/reset.js",
     "list": "node list.js",
     "generate": "node generator/index.js",
     "dashboard": "node dashboard/server.js"

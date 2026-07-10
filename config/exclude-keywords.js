@@ -5,5 +5,5 @@ export default [
     "salesforce", "gtm", "curriculum", "telco", "enablement",
     "field engineering", "technical services", "implementation",
     "architect", "director", "manager", "specialist", "advocate",
-    "administrator", "associate"
+    "administrator", "associate", "hybrid", "onsite"
 ];

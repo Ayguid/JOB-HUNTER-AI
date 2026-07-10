@@ -1,10 +1,10 @@
 import db from "./database/sqlite.js";
 import score from "./scoring/score.js";
-import EXCLUDE_TITLES from "./config/exclude-titles.js";
+import EXCLUDE_KEYWORDS from "./config/exclude-keywords.js";
 
 function isExcluded(job) {
-    const title = (job.title ?? "").toLowerCase();
-    return EXCLUDE_TITLES.some(keyword => title.includes(keyword));
+    const text = `${job.title ?? ""} ${job.location ?? ""}`.toLowerCase();
+    return EXCLUDE_KEYWORDS.some(keyword => text.includes(keyword));
 }
 
 const jobs = db.prepare(`SELECT * FROM jobs`).all()

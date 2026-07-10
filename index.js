@@ -1,5 +1,6 @@
 import fs from "fs";
 import db from "./database/sqlite.js";
+import { normalizeJob } from "./crawler/utils.js";
 
 console.clear();
 
@@ -38,7 +39,7 @@ const files = fs.readdirSync("./crawler");
 
 for (const file of files) {
 
-    if (!file.endsWith(".js"))
+    if (!file.endsWith(".js") || file === "utils.js")
         continue;
 
     const module = await import(`./crawler/${file}`);
@@ -59,7 +60,7 @@ for (const crawler of crawlers) {
 
     console.log(`Searching ${crawler.name}...`);
 
-    const jobs = await crawler.run();
+    const jobs = (await crawler.run()).map(normalizeJob);
 
     totalFound += jobs.length;
 

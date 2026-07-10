@@ -37,7 +37,16 @@ for (const exp of cv.experience) {
     md += "\n";
 }
 
-fs.mkdirSync("./output", { recursive: true });
-fs.writeFileSync("./output/cv.md", md);
+const slugify = (text) => text
+        .toLowerCase()
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // saca tildes
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)/g, "");
 
-console.log(`CV generado para: ${job.title} @ ${job.company} (score: ${analysis.score})`);
+
+const filename = `cv-${slugify(job.company)}-${slugify(job.title)}-${id}.md`;
+
+fs.mkdirSync("./output", { recursive: true });
+fs.writeFileSync(`./output/${filename}`, md);
+
+console.log(`CV generado: output/${filename} (score: ${analysis.score})`);

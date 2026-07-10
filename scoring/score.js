@@ -1,16 +1,17 @@
 import TAXONOMY from "../config/taxonomy.js";
 
-function buildMatcher(keyword) {
+const buildMatcher = (keyword) => {
     const escaped = keyword.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     return new RegExp(`\\b${escaped}\\b`, "i");
-}
+};
+
 
 const COMPILED = TAXONOMY.map(entry => ({
     ...entry,
     patterns: entry.keywords.map(buildMatcher),
 }));
 
-export default function score(job) {
+const score = (job) => {
     const text = [job.title, job.company, job.location, job.description]
         .filter(Boolean)
         .join(" ");
@@ -35,4 +36,6 @@ export default function score(job) {
     }
 
     return { score: total, reasons, text };
-}
+};
+
+export default score;

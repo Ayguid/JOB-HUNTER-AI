@@ -9,8 +9,8 @@ export default [
     { tag: "typescript", keywords: ["typescript", "ts"], points: 10, label: "TypeScript" },
     { tag: "node", keywords: ["node", "node.js", "nodejs"], points: 10, label: "Node.js" },
     { tag: "react", keywords: ["react", "react.js", "reactjs"], points: 8, label: "React" },
-    { tag: "python", keywords: ["python"], points: 8, label: "Python" },
-    { tag: "c#", keywords: ["c#", "csharp", ".net", "dotnet"], points: 10, label: "C#" },
+    //{ tag: "python", keywords: ["python"], points: 2, label: "Python" },
+    //{ tag: "c#", keywords: ["c#", "csharp", ".net", "dotnet"], points: 2, label: "C#" },
 
     { tag: "remote", keywords: ["remote", "remoto", "home office", "teletrabajo"], points: 20, label: "Remote Collaboration" },
 

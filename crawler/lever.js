@@ -1,8 +1,8 @@
 import axios from "axios";
+import { buildJob } from "./utils.js";
 
 const COMPANIES = [
-    "microventures", "posthog", "railway",
-    "sourcegraph", "gusto", "buffer", "planetscale"
+    "microventures"
 ];
 
 const transformJob = (job, company) => {
@@ -10,27 +10,25 @@ const transformJob = (job, company) => {
         .filter(Boolean)
         .join(" ");
 
-    return {
+    return buildJob({
         source: "lever",
-        external_id: String(job.id),
-        company: String(company),
-        title: String(job.text ?? ""),
-        location: String(job.categories?.location ?? ""),
-        remote: (job.categories?.location ?? "").toLowerCase().includes("remote") ? 1 : 0,
-        url: String(job.hostedUrl ?? ""),
-        salary: null,
+        external_id: job.id,
+        company,
+        title: job.text,
+        location: job.categories?.location,
+        url: job.hostedUrl,
         description
-    };
+    });
 };
 
 const fetchCompanyJobs = async (company) => {
     try {
         const url = `https://api.lever.co/v0/postings/${company}?mode=json`;
         const { data } = await axios.get(url);
-        
+
         const jobs = data.map((job) => transformJob(job, company));
         console.log(`✅ ${company}: ${jobs.length} jobs`);
-        
+
         return jobs;
     } catch (error) {
         if (error.response?.status === 404) {
@@ -44,17 +42,14 @@ const fetchCompanyJobs = async (company) => {
     }
 };
 
-
 const fetchLeverJobs = async () => {
     console.log("🔍 Searching Lever...");
-    
-    const results = await Promise.all(
-        COMPANIES.map(fetchCompanyJobs)
-    );
-    
+
+    const results = await Promise.all(COMPANIES.map(fetchCompanyJobs));
     const jobs = results.flat();
+
     console.log(`📊 Total: ${jobs.length} jobs fetched from ${COMPANIES.length} companies`);
-    
+
     return jobs;
 };
 
